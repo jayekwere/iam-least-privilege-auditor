@@ -1,0 +1,136 @@
+IAM audit | demo | complete | 17 active | 0 suppressed
+┏━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━┓
+┃ Severity ┃ Rule   ┃ Resource                  ┃ Evidence                   ┃ Remediation               ┃ Suppression ┃
+┡━━━━━━━━━━╇━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━┩
+│ critical │ IAM005 │ arn:aws:iam::00000000000… │ {"all_iam_actions": true,  │ Restrict IAM actions and  │             │
+│          │        │                           │ "assessment": "escalation  │ role ARNs, require        │             │
+│          │        │                           │ candidate, effective       │ iam:PassedToService for   │             │
+│          │        │                           │ privilege not proven",     │ PassRole, and review      │             │
+│          │        │                           │ "condition_present":       │ boundaries, denies, and   │             │
+│          │        │                           │ false, "pass_role": true,  │ the caller's related      │             │
+│          │        │                           │ "resources": ["*"],        │ service grants.           │             │
+│          │        │                           │ "statement_index": 0}      │                           │             │
+│ critical │ IAM005 │ arn:aws:iam::00000000000… │ {"attachment": "direct or  │ Replace                   │             │
+│          │        │                           │ group", "policy_name":     │ AdministratorAccess with  │             │
+│          │        │                           │ "AdministratorAccess"}     │ a scoped role; restrict   │             │
+│          │        │                           │                            │ privileged sessions with  │             │
+│          │        │                           │                            │ approval, MFA, and an     │             │
+│          │        │                           │                            │ appropriate permissions   │             │
+│          │        │                           │                            │ boundary.                 │             │
+│ critical │ IAM005 │ arn:aws:iam::00000000000… │ {"all_iam_actions": true,  │ Restrict IAM actions and  │             │
+│          │        │                           │ "assessment": "escalation  │ role ARNs, require        │             │
+│          │        │                           │ candidate, effective       │ iam:PassedToService for   │             │
+│          │        │                           │ privilege not proven",     │ PassRole, and review      │             │
+│          │        │                           │ "condition_present":       │ boundaries, denies, and   │             │
+│          │        │                           │ false, "pass_role": true,  │ the caller's related      │             │
+│          │        │                           │ "resources": ["*"],        │ service grants.           │             │
+│          │        │                           │ "statement_index": 0}      │                           │             │
+│ high     │ IAM002 │ arn:aws:iam::00000000000… │ {"age_days": 180,          │ Identify the key by       │             │
+│          │        │                           │ "key_fingerprint":         │ suffix and fingerprint.   │             │
+│          │        │                           │ "283aa2a6b540f1cf",        │ Migrate to temporary role │             │
+│          │        │                           │ "key_suffix": "0000",      │ credentials; otherwise    │             │
+│          │        │                           │ "last_used": null,         │ rotate with a tested      │             │
+│          │        │                           │ "reasons": ["no recent     │ overlap, deactivate, then │             │
+│          │        │                           │ use", "rotation threshold  │ delete the old key.       │             │
+│          │        │                           │ reached"], "unused_days":  │                           │             │
+│          │        │                           │ 180}                       │                           │             │
+│ high     │ IAM007 │ arn:aws:iam::00000000000… │ {"external_id_enforced":   │ Restrict trust to         │             │
+│          │        │                           │ false,                     │ approved role ARNs. For   │             │
+│          │        │                           │ "external_principals":     │ delegated third-party     │             │
+│          │        │                           │ ["arn:aws:iam::1111111111… │ access require a unique   │             │
+│          │        │                           │ "other_conditions_present… │ ExternalId with           │             │
+│          │        │                           │ false, "statement_index":  │ StringEquals; review      │             │
+│          │        │                           │ 0}                         │ other conditions and keep │             │
+│          │        │                           │                            │ a trusted-account         │             │
+│          │        │                           │                            │ exception only with an    │             │
+│          │        │                           │                            │ owner and reason.         │             │
+│ high     │ IAM005 │ arn:aws:iam::00000000000… │ {"all_iam_actions": false, │ Restrict IAM actions and  │             │
+│          │        │                           │ "assessment": "escalation  │ role ARNs, require        │             │
+│          │        │                           │ candidate, effective       │ iam:PassedToService for   │             │
+│          │        │                           │ privilege not proven",     │ PassRole, and review      │             │
+│          │        │                           │ "condition_present":       │ boundaries, denies, and   │             │
+│          │        │                           │ false, "pass_role": true,  │ the caller's related      │             │
+│          │        │                           │ "resources":               │ service grants.           │             │
+│          │        │                           │ ["arn:aws:iam::0000000000… │                           │             │
+│          │        │                           │ "statement_index": 0}      │                           │             │
+│ high     │ IAM004 │ arn:aws:iam::00000000000… │ {"action_star": true,      │ Replace global actions    │             │
+│          │        │                           │ "condition_present":       │ with required actions and │             │
+│          │        │                           │ false, "resource_star":    │ scope resources where     │             │
+│          │        │                           │ true, "source":            │ supported. Document       │             │
+│          │        │                           │ "customer-managed",        │ actions requiring         │             │
+│          │        │                           │ "statement_index": 0}      │ Resource '*' with a       │             │
+│          │        │                           │                            │ suppression.              │             │
+│ high     │ IAM006 │ arn:aws:iam::00000000000… │ {"console_enabled": true,  │ Assign and enforce MFA    │             │
+│          │        │                           │ "mfa_device_assigned":     │ for interactive access;   │             │
+│          │        │                           │ false}                     │ migrate programmatic-only │             │
+│          │        │                           │                            │ users to workload roles.  │             │
+│          │        │                           │                            │ An assigned device alone  │             │
+│          │        │                           │                            │ does not prove policy     │             │
+│          │        │                           │                            │ enforcement.              │             │
+│ medium   │ IAM003 │ arn:aws:iam::00000000000… │ {"inactive_days": 120,     │ Confirm ownership and     │             │
+│          │        │                           │ "kind": "user",            │ seasonal use, remove      │             │
+│          │        │                           │ "latest_activity_or_creat… │ unneeded permissions, and │             │
+│          │        │                           │ "2025-09-17T12:00:00+00:0… │ disable unused            │             │
+│          │        │                           │                            │ credentials or retire the │             │
+│          │        │                           │                            │ role through a reviewed   │             │
+│          │        │                           │                            │ change.                   │             │
+│ medium   │ IAM004 │ arn:aws:iam::00000000000… │ {"action_star": false,     │ Replace global actions    │             │
+│          │        │                           │ "condition_present":       │ with required actions and │             │
+│          │        │                           │ false, "resource_star":    │ scope resources where     │             │
+│          │        │                           │ true, "source": "inline",  │ supported. Document       │             │
+│          │        │                           │ "statement_index": 0}      │ actions requiring         │             │
+│          │        │                           │                            │ Resource '*' with a       │             │
+│          │        │                           │                            │ suppression.              │             │
+│ medium   │ IAM003 │ arn:aws:iam::00000000000… │ {"inactive_days": 180,     │ Confirm ownership and     │             │
+│          │        │                           │ "kind": "user",            │ seasonal use, remove      │             │
+│          │        │                           │ "latest_activity_or_creat… │ unneeded permissions, and │             │
+│          │        │                           │ "2025-07-19T12:00:00+00:0… │ disable unused            │             │
+│          │        │                           │                            │ credentials or retire the │             │
+│          │        │                           │                            │ role through a reviewed   │             │
+│          │        │                           │                            │ change.                   │             │
+│ medium   │ IAM003 │ arn:aws:iam::00000000000… │ {"inactive_days": 180,     │ Confirm ownership and     │             │
+│          │        │                           │ "kind": "role",            │ seasonal use, remove      │             │
+│          │        │                           │ "latest_activity_or_creat… │ unneeded permissions, and │             │
+│          │        │                           │ "2025-07-19T12:00:00+00:0… │ disable unused            │             │
+│          │        │                           │                            │ credentials or retire the │             │
+│          │        │                           │                            │ role through a reviewed   │             │
+│          │        │                           │                            │ change.                   │             │
+│ medium   │ IAM004 │ arn:aws:iam::00000000000… │ {"action_star": false,     │ Replace global actions    │             │
+│          │        │                           │ "condition_present":       │ with required actions and │             │
+│          │        │                           │ false, "resource_star":    │ scope resources where     │             │
+│          │        │                           │ true, "source": "inline",  │ supported. Document       │             │
+│          │        │                           │ "statement_index": 0}      │ actions requiring         │             │
+│          │        │                           │                            │ Resource '*' with a       │             │
+│          │        │                           │                            │ suppression.              │             │
+│ medium   │ IAM004 │ arn:aws:iam::00000000000… │ {"action_star": false,     │ Replace global actions    │             │
+│          │        │                           │ "condition_present":       │ with required actions and │             │
+│          │        │                           │ false, "resource_star":    │ scope resources where     │             │
+│          │        │                           │ true, "source": "inline",  │ supported. Document       │             │
+│          │        │                           │ "statement_index": 0}      │ actions requiring         │             │
+│          │        │                           │                            │ Resource '*' with a       │             │
+│          │        │                           │                            │ suppression.              │             │
+│ medium   │ IAM001 │ arn:aws:iam::00000000000… │ {"last_attempt":           │ Review s3 with the owner  │             │
+│          │        │                           │ "2025-09-17T12:00:00+00:0… │ and CloudTrail; remove    │             │
+│          │        │                           │ "observation": "Access     │ unused grants only after  │             │
+│          │        │                           │ Advisor service-level      │ checking seasonal         │             │
+│          │        │                           │ tracking window",          │ workloads and testing a   │             │
+│          │        │                           │ "service": "s3",           │ narrower policy.          │             │
+│          │        │                           │ "threshold_days": 90}      │                           │             │
+│ low      │ IAM007 │ arn:aws:iam::00000000000… │ {"external_id_enforced":   │ Restrict trust to         │             │
+│          │        │                           │ true,                      │ approved role ARNs. For   │             │
+│          │        │                           │ "external_principals":     │ delegated third-party     │             │
+│          │        │                           │ ["arn:aws:iam::1111111111… │ access require a unique   │             │
+│          │        │                           │ "other_conditions_present… │ ExternalId with           │             │
+│          │        │                           │ true, "statement_index":   │ StringEquals; review      │             │
+│          │        │                           │ 0}                         │ other conditions and keep │             │
+│          │        │                           │                            │ a trusted-account         │             │
+│          │        │                           │                            │ exception only with an    │             │
+│          │        │                           │                            │ owner and reason.         │             │
+│ low      │ IAM006 │ arn:aws:iam::00000000000… │ {"console_enabled": false, │ Assign and enforce MFA    │             │
+│          │        │                           │ "mfa_device_assigned":     │ for interactive access;   │             │
+│          │        │                           │ false}                     │ migrate programmatic-only │             │
+│          │        │                           │                            │ users to workload roles.  │             │
+│          │        │                           │                            │ An assigned device alone  │             │
+│          │        │                           │                            │ does not prove policy     │             │
+│          │        │                           │                            │ enforcement.              │             │
+└──────────┴────────┴───────────────────────────┴────────────────────────────┴───────────────────────────┴─────────────┘

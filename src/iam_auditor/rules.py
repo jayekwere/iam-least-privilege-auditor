@@ -210,7 +210,7 @@ def admin_access(snapshot: Snapshot, config: Config, now: datetime) -> list[Find
                         Severity.CRITICAL,
                         principal.arn,
                         "AdministratorAccess is attached directly or through a group",
-                        {"policy_arn": arn},
+                        {"policy_name": "AdministratorAccess", "attachment": "direct or group"},
                         "Replace AdministratorAccess with a scoped role; restrict privileged "
                         "sessions with approval, MFA, and an appropriate permissions boundary.",
                         arn,
@@ -219,7 +219,10 @@ def admin_access(snapshot: Snapshot, config: Config, now: datetime) -> list[Find
     for policy in snapshot.policies:
         for index, statement in statements(policy.document):
             resources = strings(statement.get("Resource"))
-            if not any("*" in resource or "?" in resource for resource in resources):
+            if not any(
+                resource == "*" or (":iam::" in resource and ("*" in resource or "?" in resource))
+                for resource in resources
+            ):
                 continue
             actions = [action.lower() for action in strings(statement.get("Action"))]
             all_iam = any(action in {"*", "iam:*"} for action in actions)

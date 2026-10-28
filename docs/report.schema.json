@@ -1,0 +1,265 @@
+{
+  "$defs": {
+    "AccountResult": {
+      "additionalProperties": false,
+      "properties": {
+        "account_id": {
+          "title": "Account Id",
+          "type": "string"
+        },
+        "policies": {
+          "title": "Policies",
+          "type": "integer"
+        },
+        "roles": {
+          "title": "Roles",
+          "type": "integer"
+        },
+        "status": {
+          "enum": [
+            "complete",
+            "incomplete"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "users": {
+          "title": "Users",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "account_id",
+        "status",
+        "users",
+        "roles",
+        "policies"
+      ],
+      "title": "AccountResult",
+      "type": "object"
+    },
+    "CollectionIssue": {
+      "additionalProperties": false,
+      "properties": {
+        "account_id": {
+          "title": "Account Id",
+          "type": "string"
+        },
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "operation": {
+          "title": "Operation",
+          "type": "string"
+        },
+        "resource": {
+          "title": "Resource",
+          "type": "string"
+        }
+      },
+      "required": [
+        "account_id",
+        "resource",
+        "operation",
+        "code"
+      ],
+      "title": "CollectionIssue",
+      "type": "object"
+    },
+    "Finding": {
+      "additionalProperties": false,
+      "properties": {
+        "account_id": {
+          "title": "Account Id",
+          "type": "string"
+        },
+        "evidence": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "title": "Evidence",
+          "type": "object"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "remediation": {
+          "title": "Remediation",
+          "type": "string"
+        },
+        "resource": {
+          "title": "Resource",
+          "type": "string"
+        },
+        "rule_id": {
+          "$ref": "#/$defs/RuleId"
+        },
+        "severity": {
+          "$ref": "#/$defs/Severity"
+        },
+        "suppression_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Suppression Reason"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "rule_id",
+        "severity",
+        "account_id",
+        "resource",
+        "title",
+        "evidence",
+        "remediation"
+      ],
+      "title": "Finding",
+      "type": "object"
+    },
+    "JsonValue": {},
+    "RuleId": {
+      "enum": [
+        "IAM001",
+        "IAM002",
+        "IAM003",
+        "IAM004",
+        "IAM005",
+        "IAM006",
+        "IAM007"
+      ],
+      "title": "RuleId",
+      "type": "string"
+    },
+    "Severity": {
+      "enum": [
+        "critical",
+        "high",
+        "medium",
+        "low"
+      ],
+      "title": "Severity",
+      "type": "string"
+    },
+    "Summary": {
+      "additionalProperties": false,
+      "properties": {
+        "active": {
+          "title": "Active",
+          "type": "integer"
+        },
+        "by_severity": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "propertyNames": {
+            "$ref": "#/$defs/Severity"
+          },
+          "title": "By Severity",
+          "type": "object"
+        },
+        "suppressed": {
+          "title": "Suppressed",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "active",
+        "suppressed",
+        "by_severity"
+      ],
+      "title": "Summary",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "accounts": {
+      "items": {
+        "$ref": "#/$defs/AccountResult"
+      },
+      "title": "Accounts",
+      "type": "array"
+    },
+    "collection_issues": {
+      "items": {
+        "$ref": "#/$defs/CollectionIssue"
+      },
+      "title": "Collection Issues",
+      "type": "array"
+    },
+    "findings": {
+      "items": {
+        "$ref": "#/$defs/Finding"
+      },
+      "title": "Findings",
+      "type": "array"
+    },
+    "generated_at": {
+      "format": "date-time",
+      "title": "Generated At",
+      "type": "string"
+    },
+    "mode": {
+      "enum": [
+        "live",
+        "demo"
+      ],
+      "title": "Mode",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "complete",
+        "incomplete"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "summary": {
+      "$ref": "#/$defs/Summary"
+    },
+    "suppressed_findings": {
+      "items": {
+        "$ref": "#/$defs/Finding"
+      },
+      "title": "Suppressed Findings",
+      "type": "array"
+    },
+    "tool_version": {
+      "default": "0.1.0",
+      "title": "Tool Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "generated_at",
+    "mode",
+    "status",
+    "accounts",
+    "summary",
+    "findings",
+    "suppressed_findings",
+    "collection_issues"
+  ],
+  "title": "Report",
+  "type": "object"
+}

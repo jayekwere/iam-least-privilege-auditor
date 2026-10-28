@@ -132,6 +132,7 @@ def test_admin_attachment_and_pass_role_scope(snapshot: Snapshot) -> None:
         ("iam:PassRole", f"arn:aws:iam::{DEMO_ACCOUNT}:role/mock-one", 0),
         ("iam:Pass*", f"arn:aws:iam::{DEMO_ACCOUNT}:role/mock-*", 1),
         ("s3:*", "*", 0),
+        ("*", "arn:aws:s3:::mock-bucket/*", 0),
         ("IAM:*", "*", 1),
     ]:
         snapshot.policies = [

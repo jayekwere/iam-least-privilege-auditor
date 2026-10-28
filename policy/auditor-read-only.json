@@ -1,0 +1,20 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ReadIamAuditObservations",
+      "Effect": "Allow",
+      "Action": [
+        "iam:GetAccountAuthorizationDetails",
+        "iam:GetUser",
+        "iam:GetLoginProfile",
+        "iam:ListMFADevices",
+        "iam:ListAccessKeys",
+        "iam:GetAccessKeyLastUsed",
+        "iam:GenerateServiceLastAccessedDetails",
+        "iam:GetServiceLastAccessedDetails"
+      ],
+      "Resource": "*"
+    }
+  ]
+}

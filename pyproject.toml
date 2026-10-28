@@ -6,12 +6,17 @@ build-backend = "setuptools.build_meta"
 name = "iam-least-privilege-auditor"
 version = "0.1.0"
 description = "Read-only IAM collection and evidence-based least-privilege review"
+readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"
 authors = [{name = "Jay Ekwere"}]
 dependencies = [
   "boto3==1.43.121", "typer==0.27.3", "pydantic==2.14.1", "PyYAML==6.0.3", "rich==15.0.0",
 ]
+
+[project.urls]
+Repository = "https://github.com/jayekwere/iam-least-privilege-auditor"
+Documentation = "https://github.com/jayekwere/iam-least-privilege-auditor#readme"
 
 [project.optional-dependencies]
 demo = ["moto[iam,sts]==5.2.5"]

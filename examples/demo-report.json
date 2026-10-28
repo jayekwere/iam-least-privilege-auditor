@@ -1,0 +1,318 @@
+{
+  "schema_version": "1.0.0",
+  "tool_version": "0.1.0",
+  "generated_at": "2026-01-15T12:00:00Z",
+  "mode": "demo",
+  "status": "complete",
+  "accounts": [
+    {
+      "account_id": "000000000000",
+      "status": "complete",
+      "users": 3,
+      "roles": 2,
+      "policies": 5
+    }
+  ],
+  "summary": {
+    "active": 17,
+    "suppressed": 0,
+    "by_severity": {
+      "critical": 3,
+      "high": 5,
+      "medium": 7,
+      "low": 2
+    }
+  },
+  "findings": [
+    {
+      "id": "4ec9351f38e40bd439283814",
+      "rule_id": "IAM005",
+      "severity": "critical",
+      "account_id": "000000000000",
+      "resource": "arn:aws:iam::000000000000:role/mock-external-unguarded#inline/mock-iam-admin",
+      "title": "Broad IAM administration or PassRole grant",
+      "evidence": {
+        "statement_index": 0,
+        "all_iam_actions": true,
+        "pass_role": true,
+        "resources": [
+          "*"
+        ],
+        "condition_present": false,
+        "assessment": "escalation candidate, effective privilege not proven"
+      },
+      "remediation": "Restrict IAM actions and role ARNs, require iam:PassedToService for PassRole, and review boundaries, denies, and the caller's related service grants.",
+      "suppression_reason": null
+    },
+    {
+      "id": "6155d2cffd1f3b2ba768843f",
+      "rule_id": "IAM005",
+      "severity": "critical",
+      "account_id": "000000000000",
+      "resource": "arn:aws:iam::000000000000:user/mock-alder",
+      "title": "AdministratorAccess is attached directly or through a group",
+      "evidence": {
+        "policy_name": "AdministratorAccess",
+        "attachment": "direct or group"
+      },
+      "remediation": "Replace AdministratorAccess with a scoped role; restrict privileged sessions with approval, MFA, and an appropriate permissions boundary.",
+      "suppression_reason": null
+    },
+    {
+      "id": "d984c8521ad5b05ab079f01d",
+      "rule_id": "IAM005",
+      "severity": "critical",
+      "account_id": "000000000000",
+      "resource": "arn:aws:iam::000000000000:policy/mock-global",
+      "title": "Broad IAM administration or PassRole grant",
+      "evidence": {
+        "statement_index": 0,
+        "all_iam_actions": true,
+        "pass_role": true,
+        "resources": [
+          "*"
+        ],
+        "condition_present": false,
+        "assessment": "escalation candidate, effective privilege not proven"
+      },
+      "remediation": "Restrict IAM actions and role ARNs, require iam:PassedToService for PassRole, and review boundaries, denies, and the caller's related service grants.",
+      "suppression_reason": null
+    },
+    {
+      "id": "13182d9f375c913558b95dad",
+      "rule_id": "IAM002",
+      "severity": "high",
+      "account_id": "000000000000",
+      "resource": "arn:aws:iam::000000000000:user/mock-alder",
+      "title": "Active access key needs review",
+      "evidence": {
+        "key_fingerprint": "283aa2a6b540f1cf",
+        "key_suffix": "0000",
+        "age_days": 180,
+        "unused_days": 180,
+        "reasons": [
+          "no recent use",
+          "rotation threshold reached"
+        ],
+        "last_used": null
+      },
+      "remediation": "Identify the key by suffix and fingerprint. Migrate to temporary role credentials; otherwise rotate with a tested overlap, deactivate, then delete the old key.",
+      "suppression_reason": null
+    },
+    {
+      "id": "b410a8e4f779c8e2e565eeec",
+      "rule_id": "IAM007",
+      "severity": "high",
+      "account_id": "000000000000",
+      "resource": "arn:aws:iam::000000000000:role/mock-external-unguarded",
+      "title": "Role trusts an external AWS principal",
+      "evidence": {
+        "statement_index": 0,
+        "external_principals": [
+          "arn:aws:iam::111111111111:root"
+        ],
+        "external_id_enforced": false,
+        "other_conditions_present": false
+      },
+      "remediation": "Restrict trust to approved role ARNs. For delegated third-party access require a unique ExternalId with StringEquals; review other conditions and keep a trusted-account exception only with an owner and reason.",
+      "suppression_reason": null
+    },
+    {
+      "id": "cdc91e7501110d160d9a719c",
+      "rule_id": "IAM005",
+      "severity": "high",
+      "account_id": "000000000000",
+      "resource": "arn:aws:iam::000000000000:policy/mock-pass-role",
+      "title": "Broad IAM administration or PassRole grant",
+      "evidence": {
+        "statement_index": 0,
+        "all_iam_actions": false,
+        "pass_role": true,
+        "resources": [
+          "arn:aws:iam::000000000000:role/*"
+        ],
+        "condition_present": false,
+        "assessment": "escalation candidate, effective privilege not proven"
+      },
+      "remediation": "Restrict IAM actions and role ARNs, require iam:PassedToService for PassRole, and review boundaries, denies, and the caller's related service grants.",
+      "suppression_reason": null
+    },
+    {
+      "id": "d92e8e64669449b63403e639",
+      "rule_id": "IAM004",
+      "severity": "high",
+      "account_id": "000000000000",
+      "resource": "arn:aws:iam::000000000000:policy/mock-global",
+      "title": "Allow statement contains a global wildcard",
+      "evidence": {
+        "statement_index": 0,
+        "source": "customer-managed",
+        "action_star": true,
+        "resource_star": true,
+        "condition_present": false
+      },
+      "remediation": "Replace global actions with required actions and scope resources where supported. Document actions requiring Resource '*' with a suppression.",
+      "suppression_reason": null
+    },
+    {
+      "id": "ffe4b157f571ae62762795ec",
+      "rule_id": "IAM006",
+      "severity": "high",
+      "account_id": "000000000000",
+      "resource": "arn:aws:iam::000000000000:user/mock-alder",
+      "title": "IAM user has no assigned MFA device",
+      "evidence": {
+        "console_enabled": true,
+        "mfa_device_assigned": false
+      },
+      "remediation": "Assign and enforce MFA for interactive access; migrate programmatic-only users to workload roles. An assigned device alone does not prove policy enforcement.",
+      "suppression_reason": null
+    },
+    {
+      "id": "3728abec634c138bfeec921c",
+      "rule_id": "IAM003",
+      "severity": "medium",
+      "account_id": "000000000000",
+      "resource": "arn:aws:iam::000000000000:user/mock-alder",
+      "title": "User has no recent recorded activity",
+      "evidence": {
+        "latest_activity_or_creation": "2025-09-17T12:00:00+00:00",
+        "inactive_days": 120,
+        "kind": "user"
+      },
+      "remediation": "Confirm ownership and seasonal use, remove unneeded permissions, and disable unused credentials or retire the role through a reviewed change.",
+      "suppression_reason": null
+    },
+    {
+      "id": "6173b35a54ace0de379cf110",
+      "rule_id": "IAM004",
+      "severity": "medium",
+      "account_id": "000000000000",
+      "resource": "arn:aws:iam::000000000000:role/mock-external-unguarded#inline/mock-iam-admin",
+      "title": "Allow statement contains a global wildcard",
+      "evidence": {
+        "statement_index": 0,
+        "source": "inline",
+        "action_star": false,
+        "resource_star": true,
+        "condition_present": false
+      },
+      "remediation": "Replace global actions with required actions and scope resources where supported. Document actions requiring Resource '*' with a suppression.",
+      "suppression_reason": null
+    },
+    {
+      "id": "66e7532bf0ac4b39a291b8fb",
+      "rule_id": "IAM003",
+      "severity": "medium",
+      "account_id": "000000000000",
+      "resource": "arn:aws:iam::000000000000:user/mock-birch",
+      "title": "User has no recent recorded activity",
+      "evidence": {
+        "latest_activity_or_creation": "2025-07-19T12:00:00+00:00",
+        "inactive_days": 180,
+        "kind": "user"
+      },
+      "remediation": "Confirm ownership and seasonal use, remove unneeded permissions, and disable unused credentials or retire the role through a reviewed change.",
+      "suppression_reason": null
+    },
+    {
+      "id": "7349597bf898743812100dbc",
+      "rule_id": "IAM003",
+      "severity": "medium",
+      "account_id": "000000000000",
+      "resource": "arn:aws:iam::000000000000:role/mock-external-unguarded",
+      "title": "Role has no recent recorded activity",
+      "evidence": {
+        "latest_activity_or_creation": "2025-07-19T12:00:00+00:00",
+        "inactive_days": 180,
+        "kind": "role"
+      },
+      "remediation": "Confirm ownership and seasonal use, remove unneeded permissions, and disable unused credentials or retire the role through a reviewed change.",
+      "suppression_reason": null
+    },
+    {
+      "id": "790f75dec694e763bc89410a",
+      "rule_id": "IAM004",
+      "severity": "medium",
+      "account_id": "000000000000",
+      "resource": "arn:aws:iam::000000000000:user/mock-alder#inline/mock-unused-service",
+      "title": "Allow statement contains a global wildcard",
+      "evidence": {
+        "statement_index": 0,
+        "source": "inline",
+        "action_star": false,
+        "resource_star": true,
+        "condition_present": false
+      },
+      "remediation": "Replace global actions with required actions and scope resources where supported. Document actions requiring Resource '*' with a suppression.",
+      "suppression_reason": null
+    },
+    {
+      "id": "8d91a7c0e6669e07eb02f76b",
+      "rule_id": "IAM004",
+      "severity": "medium",
+      "account_id": "000000000000",
+      "resource": "arn:aws:iam::000000000000:group/mock-maintainers#inline/mock-service-list",
+      "title": "Allow statement contains a global wildcard",
+      "evidence": {
+        "statement_index": 0,
+        "source": "inline",
+        "action_star": false,
+        "resource_star": true,
+        "condition_present": false
+      },
+      "remediation": "Replace global actions with required actions and scope resources where supported. Document actions requiring Resource '*' with a suppression.",
+      "suppression_reason": null
+    },
+    {
+      "id": "ec5a2a22d5e950c2f86b81c2",
+      "rule_id": "IAM001",
+      "severity": "medium",
+      "account_id": "000000000000",
+      "resource": "arn:aws:iam::000000000000:user/mock-alder",
+      "title": "Granted service has no recent recorded access attempt",
+      "evidence": {
+        "service": "s3",
+        "threshold_days": 90,
+        "last_attempt": "2025-09-17T12:00:00+00:00",
+        "observation": "Access Advisor service-level tracking window"
+      },
+      "remediation": "Review s3 with the owner and CloudTrail; remove unused grants only after checking seasonal workloads and testing a narrower policy.",
+      "suppression_reason": null
+    },
+    {
+      "id": "ad99478e069fbae5ee0b34f0",
+      "rule_id": "IAM007",
+      "severity": "low",
+      "account_id": "000000000000",
+      "resource": "arn:aws:iam::000000000000:role/mock-external-guarded",
+      "title": "Role trusts an external AWS principal",
+      "evidence": {
+        "statement_index": 0,
+        "external_principals": [
+          "arn:aws:iam::111111111111:root"
+        ],
+        "external_id_enforced": true,
+        "other_conditions_present": true
+      },
+      "remediation": "Restrict trust to approved role ARNs. For delegated third-party access require a unique ExternalId with StringEquals; review other conditions and keep a trusted-account exception only with an owner and reason.",
+      "suppression_reason": null
+    },
+    {
+      "id": "d6c425b46144f7345234511f",
+      "rule_id": "IAM006",
+      "severity": "low",
+      "account_id": "000000000000",
+      "resource": "arn:aws:iam::000000000000:user/mock-birch",
+      "title": "IAM user has no assigned MFA device",
+      "evidence": {
+        "console_enabled": false,
+        "mfa_device_assigned": false
+      },
+      "remediation": "Assign and enforce MFA for interactive access; migrate programmatic-only users to workload roles. An assigned device alone does not prove policy enforcement.",
+      "suppression_reason": null
+    }
+  ],
+  "suppressed_findings": [],
+  "collection_issues": []
+}

@@ -60,10 +60,13 @@ def seed_environment(iam: Any, now: datetime = DEMO_NOW) -> None:
             iam.create_access_key(UserName="mock-alder")
         iam.create_group(GroupName="mock-maintainers")
         iam.add_user_to_group(GroupName="mock-maintainers", UserName="mock-alder")
-        iam.attach_group_policy(
-            GroupName="mock-maintainers",
-            PolicyArn="arn:aws:iam::aws:policy/AdministratorAccess",
+        administrator = next(
+            policy["Arn"]
+            for page in iam.get_paginator("list_policies").paginate(Scope="AWS")
+            for policy in page["Policies"]
+            if policy["PolicyName"] == "AdministratorAccess"
         )
+        iam.attach_group_policy(GroupName="mock-maintainers", PolicyArn=administrator)
         iam.create_policy(PolicyName="mock-global", PolicyDocument=json.dumps(allow("*")))
         iam.create_policy(
             PolicyName="mock-pass-role",
@@ -108,9 +111,19 @@ def mock_inventory(now: datetime = DEMO_NOW) -> Iterator[Any]:
     from moto import mock_aws
 
     with (
-        patch.dict(os.environ, {"MOTO_ACCOUNT_ID": DEMO_ACCOUNT}),
+        patch.dict(
+            os.environ,
+            {
+                "MOTO_ACCOUNT_ID": DEMO_ACCOUNT,
+                "AWS_CONFIG_FILE": os.devnull,
+                "AWS_SHARED_CREDENTIALS_FILE": os.devnull,
+                "AWS_EC2_METADATA_DISABLED": "true",
+            },
+        ),
         mock_aws(config={"iam": {"load_aws_managed_policies": True}}),
     ):
+        os.environ.pop("AWS_PROFILE", None)
+        os.environ.pop("AWS_DEFAULT_PROFILE", None)
         iam = boto3.client(
             "iam",
             region_name="us-east-1",

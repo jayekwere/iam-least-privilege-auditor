@@ -1,0 +1,13 @@
+# All account IDs and resources in this file are fictional.
+thresholds:
+  unused_days: 90
+  key_unused_days: 90
+  key_rotation_days: 90
+  inactive_days: 90
+trusted_accounts: []
+suppressions:
+  - rule_id: IAM004
+    account_id: "000000000000"
+    resource: "arn:aws:iam::000000000000:group/mock-maintainers#inline/mock-service-list"
+    reason: "Mock EC2 DescribeInstances requires Resource '*'; review on policy changes."
+    expires_on: 2027-01-15
