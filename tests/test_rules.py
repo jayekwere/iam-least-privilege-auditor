@@ -133,6 +133,7 @@ def test_admin_attachment_and_pass_role_scope(snapshot: Snapshot) -> None:
         ("iam:Pass*", f"arn:aws:iam::{DEMO_ACCOUNT}:role/mock-*", 1),
         ("s3:*", "*", 0),
         ("*", "arn:aws:s3:::mock-bucket/*", 0),
+        ("iam:PassRole", f"arn:aws:iam::{DEMO_ACCOUNT}:user/mock-*", 0),
         ("IAM:*", "*", 1),
     ]:
         snapshot.policies = [
@@ -143,6 +144,14 @@ def test_admin_attachment_and_pass_role_scope(snapshot: Snapshot) -> None:
     doc["Statement"][0]["Condition"] = {"StringEquals": {"aws:PrincipalTag/team": "mock"}}
     snapshot.policies = [Policy(resource="mock", source="inline", document=doc)]
     assert admin_access(snapshot, Config(), DEMO_NOW)[0].severity == Severity.HIGH
+
+
+def test_same_admin_policy_via_multiple_groups_is_one_finding(snapshot: Snapshot) -> None:
+    principal = snapshot.principals[0]
+    principal.attached_policy_arns *= 3
+    snapshot.policies = []
+    snapshot.principals = [principal]
+    assert len(admin_access(snapshot, Config(), DEMO_NOW)) == 1
 
 
 def test_mfa_console_and_programmatic_severity(snapshot: Snapshot) -> None:

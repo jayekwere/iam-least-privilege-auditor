@@ -201,7 +201,7 @@ def wildcard_policies(snapshot: Snapshot, config: Config, now: datetime) -> list
 def admin_access(snapshot: Snapshot, config: Config, now: datetime) -> list[Finding]:
     results = []
     for principal in snapshot.principals:
-        for arn in principal.attached_policy_arns:
+        for arn in sorted(set(principal.attached_policy_arns)):
             if re.fullmatch(r"arn:[^:]+:iam::aws:policy/AdministratorAccess", arn):
                 results.append(
                     finding(
@@ -219,14 +219,19 @@ def admin_access(snapshot: Snapshot, config: Config, now: datetime) -> list[Find
     for policy in snapshot.policies:
         for index, statement in statements(policy.document):
             resources = strings(statement.get("Resource"))
-            if not any(
-                resource == "*" or (":iam::" in resource and ("*" in resource or "?" in resource))
+            broad_resources = [
+                resource
                 for resource in resources
-            ):
+                if resource == "*"
+                or (":iam::" in resource and ("*" in resource or "?" in resource))
+            ]
+            if not broad_resources:
                 continue
             actions = [action.lower() for action in strings(statement.get("Action"))]
             all_iam = any(action in {"*", "iam:*"} for action in actions)
-            pass_role = any(fnmatch.fnmatchcase("iam:passrole", action) for action in actions)
+            pass_role = any(
+                fnmatch.fnmatchcase("iam:passrole", action) for action in actions
+            ) and any(resource == "*" or ":role/" in resource for resource in broad_resources)
             if not all_iam and not pass_role:
                 continue
             results.append(

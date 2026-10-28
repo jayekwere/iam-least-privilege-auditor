@@ -1,0 +1,26 @@
+.venv/bin/ruff check .
+All checks passed!
+.venv/bin/ruff format --check .
+18 files already formatted
+.venv/bin/mypy
+Success: no issues found in 13 source files
+.venv/bin/pytest
+...............................................................          [100%]
+================================ tests coverage ================================
+_______________ coverage: platform darwin, python 3.14.6-final-0 _______________
+
+Name                           Stmts   Miss Branch BrPart  Cover   Missing
+--------------------------------------------------------------------------
+src/iam_auditor/__init__.py        1      0      0      0   100%
+src/iam_auditor/cli.py            90      0     18      0   100%
+src/iam_auditor/collector.py     155      0     68      1    99%   172->174
+src/iam_auditor/config.py         36      0      6      0   100%
+src/iam_auditor/demo.py           74      0     10      0   100%
+src/iam_auditor/models.py         48      0      0      0   100%
+src/iam_auditor/report.py         52      0     20      0   100%
+src/iam_auditor/rules.py         138      0     82      0   100%
+--------------------------------------------------------------------------
+TOTAL                            594      0    204      1    99%
+Coverage XML written to file coverage.xml
+Required test coverage of 85% reached. Total coverage: 99.87%
+63 passed in 9.97s

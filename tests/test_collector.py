@@ -1,4 +1,5 @@
 import json
+import os
 from typing import Any
 from unittest.mock import Mock, patch
 from urllib.parse import quote
@@ -8,10 +9,18 @@ import boto3
 import pytest
 from botocore.exceptions import ClientError, EndpointConnectionError
 from botocore.stub import Stubber
+from moto import mock_aws
 
 from iam_auditor.collector import Collector, collect_accounts, policy_document
-from iam_auditor.demo import DEMO_ACCOUNT, DEMO_NOW, mock_inventory, queue_advisor
-from iam_auditor.models import Snapshot
+from iam_auditor.demo import (
+    DEMO_ACCOUNT,
+    DEMO_NOW,
+    EXTERNAL_ACCOUNT,
+    mock_inventory,
+    queue_advisor,
+    trust,
+)
+from iam_auditor.models import Principal, Snapshot
 
 
 def iam_client() -> Any:
@@ -239,3 +248,47 @@ def test_current_account_session_with_moto() -> None:
         )
         with patch.object(Collector, "collect", return_value=Snapshot(account_id=DEMO_ACCOUNT)):
             assert collect_accounts(session, [], None)[0].account_id == DEMO_ACCOUNT
+
+
+def test_real_sdk_assume_role_keeps_two_moto_accounts_isolated() -> None:
+    def observed(self: Collector, principal: Principal) -> None:
+        # Access Advisor is deliberately synthetic; STS and inventory use the real SDK with Moto.
+        principal.advisor_complete = True
+
+    with patch.dict(os.environ), mock_aws():
+        os.environ.pop("MOTO_ACCOUNT_ID", None)
+        base = boto3.Session(
+            aws_access_key_id="mock-access-key",
+            aws_secret_access_key="mock-secret-not-valid",
+            region_name="us-east-1",
+        )
+        sessions: dict[str, Any] = {}
+        for account in [DEMO_ACCOUNT, EXTERNAL_ACCOUNT]:
+            credentials = base.client("sts").assume_role(
+                RoleArn=f"arn:aws:iam::{account}:role/MockAudit",
+                RoleSessionName="mock-seed",
+            )["Credentials"]
+            session = boto3.Session(
+                aws_access_key_id=credentials["AccessKeyId"],
+                aws_secret_access_key=credentials["SecretAccessKey"],
+                aws_session_token=credentials["SessionToken"],
+                region_name="us-east-1",
+            )
+            iam = session.client("iam")
+            iam.create_role(
+                RoleName="MockAudit", AssumeRolePolicyDocument=json.dumps(trust(DEMO_ACCOUNT))
+            )
+            iam.create_user(UserName="mock-account-user")
+            sessions[account] = session
+        with patch.object(Collector, "service_access", observed):
+            snapshots = collect_accounts(
+                sessions[DEMO_ACCOUNT],
+                [DEMO_ACCOUNT, EXTERNAL_ACCOUNT],
+                "MockAudit",
+            )
+        assert [item.account_id for item in snapshots] == [DEMO_ACCOUNT, EXTERNAL_ACCOUNT]
+        for snapshot in snapshots:
+            assert not snapshot.issues and len(snapshot.principals) == 2
+            assert all(
+                f"::{snapshot.account_id}:" in principal.arn for principal in snapshot.principals
+            )
