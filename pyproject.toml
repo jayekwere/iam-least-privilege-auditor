@@ -1,0 +1,47 @@
+[build-system]
+requires = ["setuptools==84.2.1"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "iam-least-privilege-auditor"
+version = "0.1.0"
+description = "Read-only IAM collection and evidence-based least-privilege review"
+requires-python = ">=3.11"
+license = "MIT"
+authors = [{name = "Jay Ekwere"}]
+dependencies = [
+  "boto3==1.43.121", "typer==0.27.3", "pydantic==2.14.1", "PyYAML==6.0.3", "rich==15.0.0",
+]
+
+[project.optional-dependencies]
+demo = ["moto[iam,sts]==5.2.5"]
+dev = [
+  "moto[iam,sts]==5.2.5", "pytest==9.2.0", "pytest-cov==7.1.0",
+  "ruff==0.17.3", "mypy==2.4.1", "types-PyYAML==6.0.12.20260906",
+]
+
+[project.scripts]
+iam-audit = "iam_auditor.cli:app"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --cov=iam_auditor --cov-branch --cov-report=term-missing --cov-report=xml --cov-fail-under=85"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+files = ["src", "tests"]
+
+[[tool.mypy.overrides]]
+module = ["boto3.*", "botocore.*", "moto.*"]
+ignore_missing_imports = true
