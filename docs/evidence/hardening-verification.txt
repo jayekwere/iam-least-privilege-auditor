@@ -1,0 +1,12 @@
+Hosted verification: https://github.com/jayekwere/iam-least-privilege-auditor/actions/runs/41241998662
+Date: 2026-10-31
+Python 3.11: 77 passed; branch-inclusive coverage 98.99%
+Python 3.12: 77 passed; branch-inclusive coverage 98.99%
+Python 3.13: 77 passed; branch-inclusive coverage 98.99%
+Python 3.14: 77 passed; branch-inclusive coverage 98.95%
+Ruff / formatting / mypy / Bandit: passed
+Declared dependency audit: no known vulnerabilities found
+Terraform initialization / format / validation: passed
+Three demo formats and exported schema equality: passed
+Live AWS validation: not performed
+Terraform apply: not performed
