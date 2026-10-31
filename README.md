@@ -35,7 +35,7 @@ The demo uses Moto for IAM inventory and Botocore Stubber for Access Advisor, wh
 
 ### Example demo result
 
-The default demo produces **17 active findings: 3 critical, 5 high, 7 medium, and 2 low**. These are findings, not a count of distinct identities; several checks can flag the same resource.
+The default demo produces **19 active findings: 4 critical, 6 high, 7 medium, and 2 low**. These are findings, not a count of distinct identities; several checks can flag the same resource.
 
 | Severity | Rule | Resource, abbreviated | Observed evidence |
 | --- | --- | --- | --- |
@@ -94,15 +94,15 @@ For multiple accounts, the caller also needs [an explicitly scoped AssumeRole pe
 
 ## JSON integration
 
-The stable public contract is **schema_version `1.0.0`**. [JSON Schema](docs/report.schema.json) and [field semantics](docs/json-contract.md) document account collection status, finding IDs, severity ordering, evidence, and suppressions. Run `iam-audit schema` to export the installed contract. Dashboards must check `status` and `collection_issues` before displaying a clean result.
+The stable public contract is **schema_version `1.1.0`**. [JSON Schema](docs/report.schema.json) and [field semantics](docs/json-contract.md) document account collection status, finding IDs, severity ordering, evidence, and suppressions. Run `iam-audit schema` to export the installed contract. Dashboards must check `status` and `collection_issues` before displaying a clean result.
 
 ## Design decisions and honest limits
 
 - Collection, rules, and rendering are separate. Rules have no network calls; tests start with Moto inventory and explicitly modeled historical activity. AWS responses are normalized to Pydantic models. SDK boundaries are dynamically typed, while the rest is checked with strict mypy.
 - This is a static review aid, not a full IAM authorization engine. SCPs, resource policies, permission boundaries, session policies, explicit-deny interactions, condition semantics, and combined escalation paths are not evaluated. Findings on unattached policies are hygiene candidates, not exposure claims.
 - Access Advisor is service-level, has a bounded tracking period, can lag, and includes denied attempts. Missing timestamps mean no observed attempt in that window, not proof that a permission has never been used. RoleLastUsed also has retention limits. `iam:PassRole` is not tracked by Access Advisor. Validate removals with owners and CloudTrail.
-- Advisor polling is bounded to 30 attempts, one second apart, in the same role session. SDK requests have connection/read timeouts and bounded retries. Throttling, failed jobs, and denied calls yield explicit incomplete reports; missing activity never becomes a clean result. Large accounts take time because collection is sequential.
-- AWS-managed policy documents other than the direct or group AdministratorAccess attachment check are excluded. IAM Identity Center, root credentials, service-specific credentials, SAML/OIDC trust conditions, `NotAction`, `NotResource`, and `NotPrincipal` are outside these seven rules. A mandatory ExternalId is useful for delegated access, but is not required for every valid trust relationship and is not a complete trust assessment.
+- Inventory and Advisor pagination each stop after 1,000 pages per operation and mark collection incomplete when truncated at that limit. Advisor polling is bounded to 30 attempts, one second apart, in the same role session. SDK requests have connection/read timeouts and bounded retries. Throttling, failed jobs, and denied calls yield explicit incomplete reports; missing activity never becomes a clean result. Large accounts take time because collection is sequential.
+- Attached AWS-managed policy documents are inspected alongside local policies. IAM Identity Center, root credentials, service-specific credentials, SAML trust semantics, `NotAction`, `NotResource`, and `NotPrincipal` are outside the static rules. A mandatory ExternalId is useful for delegated access, but is not required for every valid trust relationship and is not a complete trust assessment.
 - MFA assignment is distinct from MFA enforcement. No credential, policy, or trust changes are made. Rotation and deletion recommendations always require review.
 - Demo and test validation do not establish behavior or permissions in a real AWS account. Live AWS validation has not been performed.
 
@@ -116,6 +116,12 @@ make typecheck
 make test
 ```
 
-CI runs Ruff, strict mypy, pytest with branch coverage of at least 85%, and all three demo outputs on Python 3.11, 3.12, 3.13, and 3.14 for every push and pull request. It needs no AWS credentials. Test sockets are blocked, and all seven rules have Moto-backed positive and negative cases. CI uploads test, coverage, schema, and demo artifacts for 14 days. See [verification notes](docs/verification.md).
+CI runs Ruff, strict mypy, pytest with branch coverage of at least 85%, and all three demo outputs on Python 3.11, 3.12, 3.13, and 3.14 for every push and pull request. It needs no AWS credentials. Test sockets are blocked, and the original seven rules have Moto-backed positive and negative cases; OIDC and Analyzer checks have focused offline tests. CI uploads test, coverage, schema, and demo artifacts for 14 days. See [verification notes](docs/verification.md).
 
 MIT licensed. Contributions should include a focused test and use only fictional identifiers in fixtures and public reports.
+
+## Additional evidence and trust review
+
+IAM008 reviews OIDC Allow statements missing exact issuer-qualified audience or subject conditions. Pattern-based trust is a review candidate, not proven unsafe. IAM009 imports active IAM role external-access findings from an existing regional analyzer using `iam-audit audit --analyzer-arn ARN --region REGION`. This option supports current-account mode only and never creates analyzers. Denied or truncated Analyzer collection makes the report incomplete. Other regions and archived findings are outside the request.
+
+Findings include `classification`: missing MFA assignment is an observed misconfiguration; all other results are review candidates. No rule claims validated effective permissions. See the [architecture and threat model](docs/threat-model.md), [controlled lab](lab/README.md), [contribution guidance](CONTRIBUTING.md), and [security reporting](SECURITY.md).

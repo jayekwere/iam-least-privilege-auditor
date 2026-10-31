@@ -24,8 +24,11 @@ from iam_auditor.rules import (
 
 def test_every_rule_has_moto_seeded_positive(snapshot: Snapshot) -> None:
     assert not snapshot.issues
-    assert {item.rule_id for item in evaluate(snapshot, Config(), DEMO_NOW)} == set(RuleId)
-    assert len(RULES) == 7
+    assert {item.rule_id for item in evaluate(snapshot, Config(), DEMO_NOW)} == set(RuleId) - {
+        RuleId.FEDERATED_TRUST,
+        RuleId.ANALYZER,
+    }
+    assert len(RULES) == 9
 
 
 def test_unused_service_threshold_and_observation_window(snapshot: Snapshot) -> None:
@@ -91,7 +94,11 @@ def test_inactive_uses_all_activity_and_skips_incomplete(snapshot: Snapshot) -> 
 
 def test_wildcards_cover_managed_group_and_identity_inline(snapshot: Snapshot) -> None:
     results = wildcard_policies(snapshot, Config(), DEMO_NOW)
-    assert {row.evidence["source"] for row in results} == {"customer-managed", "inline"}
+    assert {row.evidence["source"] for row in results} == {
+        "customer-managed",
+        "inline",
+        "aws-managed",
+    }
     assert any(":group/" in row.resource for row in results)
     assert any(":role/" in row.resource for row in results)
     snapshot.policies = [
@@ -230,4 +237,4 @@ def test_empty_and_malformed_statement_shapes() -> None:
 def test_finding_ids_are_stable_across_time(snapshot: Snapshot) -> None:
     first = {item.id for item in evaluate(snapshot, Config(), DEMO_NOW)}
     second = {item.id for item in evaluate(snapshot, Config(), DEMO_NOW + timedelta(days=1))}
-    assert len(first) == 17 and first == second
+    assert len(first) == 19 and first == second

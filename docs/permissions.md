@@ -27,3 +27,11 @@ References:
 - [AWS GetCallerIdentity](https://docs.aws.amazon.com/STS/latest/APIReference/API_GetCallerIdentity.html)
 - [AWS ExternalId guidance](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_common-scenarios_third-party.html)
 - [Moto IAM support](https://docs.getmoto.org/en/latest/docs/services/iam.html)
+
+## Optional Access Analyzer
+
+`--analyzer-arn` adds only `access-analyzer:ListFindings`, scoped to the existing analyzer ARN. See `policy/access-analyzer-read-only.example.json`. The API reads ACTIVE external findings and retains IAM roles only. No ListAnalyzers, CreateAnalyzer, validation, preview or unused-access analyzer creation is requested. The analyzer must be regional and owned by the caller account. A wrong analyzer type or denied request yields incomplete status.
+
+Inventory now requests attached AWS-managed policy documents using the existing GetAccountAuthorizationDetails permission; no extra IAM action is introduced. PermissionsBoundaryArn is context from that same response, not an effective-permission calculation.
+
+AWS reference: https://docs.aws.amazon.com/access-analyzer/latest/APIReference/API_ListFindings.html

@@ -1,6 +1,6 @@
 {
-  "schema_version": "1.0.0",
-  "tool_version": "0.1.0",
+  "schema_version": "1.1.0",
+  "tool_version": "0.2.0",
   "generated_at": "2026-01-15T12:00:00Z",
   "mode": "demo",
   "status": "complete",
@@ -10,15 +10,15 @@
       "status": "complete",
       "users": 3,
       "roles": 2,
-      "policies": 5
+      "policies": 6
     }
   ],
   "summary": {
-    "active": 17,
+    "active": 19,
     "suppressed": 0,
     "by_severity": {
-      "critical": 3,
-      "high": 5,
+      "critical": 4,
+      "high": 6,
       "medium": 7,
       "low": 2
     }
@@ -42,6 +42,28 @@
         "assessment": "escalation candidate, effective privilege not proven"
       },
       "remediation": "Restrict IAM actions and role ARNs, require iam:PassedToService for PassRole, and review boundaries, denies, and the caller's related service grants.",
+      "classification": "review_candidate",
+      "suppression_reason": null
+    },
+    {
+      "id": "5abbf441250eae4e74068003",
+      "rule_id": "IAM005",
+      "severity": "critical",
+      "account_id": "000000000000",
+      "resource": "arn:aws:iam::aws:policy/AdministratorAccess",
+      "title": "Broad IAM administration or PassRole grant",
+      "evidence": {
+        "statement_index": 0,
+        "all_iam_actions": true,
+        "pass_role": true,
+        "resources": [
+          "*"
+        ],
+        "condition_present": false,
+        "assessment": "escalation candidate, effective privilege not proven"
+      },
+      "remediation": "Restrict IAM actions and role ARNs, require iam:PassedToService for PassRole, and review boundaries, denies, and the caller's related service grants.",
+      "classification": "review_candidate",
       "suppression_reason": null
     },
     {
@@ -56,6 +78,7 @@
         "attachment": "direct or group"
       },
       "remediation": "Replace AdministratorAccess with a scoped role; restrict privileged sessions with approval, MFA, and an appropriate permissions boundary.",
+      "classification": "review_candidate",
       "suppression_reason": null
     },
     {
@@ -76,6 +99,7 @@
         "assessment": "escalation candidate, effective privilege not proven"
       },
       "remediation": "Restrict IAM actions and role ARNs, require iam:PassedToService for PassRole, and review boundaries, denies, and the caller's related service grants.",
+      "classification": "review_candidate",
       "suppression_reason": null
     },
     {
@@ -97,6 +121,7 @@
         "last_used": null
       },
       "remediation": "Identify the key by suffix and fingerprint. Migrate to temporary role credentials; otherwise rotate with a tested overlap, deactivate, then delete the old key.",
+      "classification": "review_candidate",
       "suppression_reason": null
     },
     {
@@ -115,6 +140,25 @@
         "other_conditions_present": false
       },
       "remediation": "Restrict trust to approved role ARNs. For delegated third-party access require a unique ExternalId with StringEquals; review other conditions and keep a trusted-account exception only with an owner and reason.",
+      "classification": "review_candidate",
+      "suppression_reason": null
+    },
+    {
+      "id": "c1ab4fb73f4cb9cb97d8f268",
+      "rule_id": "IAM004",
+      "severity": "high",
+      "account_id": "000000000000",
+      "resource": "arn:aws:iam::aws:policy/AdministratorAccess",
+      "title": "Allow statement contains a global wildcard",
+      "evidence": {
+        "statement_index": 0,
+        "source": "aws-managed",
+        "action_star": true,
+        "resource_star": true,
+        "condition_present": false
+      },
+      "remediation": "Replace global actions with required actions and scope resources where supported. Document actions requiring Resource '*' with a suppression.",
+      "classification": "review_candidate",
       "suppression_reason": null
     },
     {
@@ -135,6 +179,7 @@
         "assessment": "escalation candidate, effective privilege not proven"
       },
       "remediation": "Restrict IAM actions and role ARNs, require iam:PassedToService for PassRole, and review boundaries, denies, and the caller's related service grants.",
+      "classification": "review_candidate",
       "suppression_reason": null
     },
     {
@@ -152,6 +197,7 @@
         "condition_present": false
       },
       "remediation": "Replace global actions with required actions and scope resources where supported. Document actions requiring Resource '*' with a suppression.",
+      "classification": "review_candidate",
       "suppression_reason": null
     },
     {
@@ -166,6 +212,7 @@
         "mfa_device_assigned": false
       },
       "remediation": "Assign and enforce MFA for interactive access; migrate programmatic-only users to workload roles. An assigned device alone does not prove policy enforcement.",
+      "classification": "observed_misconfiguration",
       "suppression_reason": null
     },
     {
@@ -181,6 +228,7 @@
         "kind": "user"
       },
       "remediation": "Confirm ownership and seasonal use, remove unneeded permissions, and disable unused credentials or retire the role through a reviewed change.",
+      "classification": "review_candidate",
       "suppression_reason": null
     },
     {
@@ -198,6 +246,7 @@
         "condition_present": false
       },
       "remediation": "Replace global actions with required actions and scope resources where supported. Document actions requiring Resource '*' with a suppression.",
+      "classification": "review_candidate",
       "suppression_reason": null
     },
     {
@@ -213,6 +262,7 @@
         "kind": "user"
       },
       "remediation": "Confirm ownership and seasonal use, remove unneeded permissions, and disable unused credentials or retire the role through a reviewed change.",
+      "classification": "review_candidate",
       "suppression_reason": null
     },
     {
@@ -228,6 +278,7 @@
         "kind": "role"
       },
       "remediation": "Confirm ownership and seasonal use, remove unneeded permissions, and disable unused credentials or retire the role through a reviewed change.",
+      "classification": "review_candidate",
       "suppression_reason": null
     },
     {
@@ -245,6 +296,7 @@
         "condition_present": false
       },
       "remediation": "Replace global actions with required actions and scope resources where supported. Document actions requiring Resource '*' with a suppression.",
+      "classification": "review_candidate",
       "suppression_reason": null
     },
     {
@@ -262,6 +314,7 @@
         "condition_present": false
       },
       "remediation": "Replace global actions with required actions and scope resources where supported. Document actions requiring Resource '*' with a suppression.",
+      "classification": "review_candidate",
       "suppression_reason": null
     },
     {
@@ -278,6 +331,7 @@
         "observation": "Access Advisor service-level tracking window"
       },
       "remediation": "Review s3 with the owner and CloudTrail; remove unused grants only after checking seasonal workloads and testing a narrower policy.",
+      "classification": "review_candidate",
       "suppression_reason": null
     },
     {
@@ -296,6 +350,7 @@
         "other_conditions_present": true
       },
       "remediation": "Restrict trust to approved role ARNs. For delegated third-party access require a unique ExternalId with StringEquals; review other conditions and keep a trusted-account exception only with an owner and reason.",
+      "classification": "review_candidate",
       "suppression_reason": null
     },
     {
@@ -310,6 +365,7 @@
         "mfa_device_assigned": false
       },
       "remediation": "Assign and enforce MFA for interactive access; migrate programmatic-only users to workload roles. An assigned device alone does not prove policy enforcement.",
+      "classification": "observed_misconfiguration",
       "suppression_reason": null
     }
   ],

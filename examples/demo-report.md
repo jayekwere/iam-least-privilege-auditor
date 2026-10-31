@@ -1,18 +1,20 @@
 # IAM least-privilege audit
 
-Mode: demo. Status: complete. Schema: 1.0.0.
+Mode: demo. Status: complete. Schema: 1.1.0.
 Generated: 2026-01-15T12:00:00+00:00.
-Active findings: 17. Suppressed: 0.
+Active findings: 19. Suppressed: 0.
 
 Findings are review candidates, not proof of effective permissions or safe removal.
 
 | Severity | Rule | Resource | Evidence | Remediation | Suppression |
 | --- | --- | --- | --- | --- | --- |
 | critical | IAM005 | arn:aws:iam::000000000000:role/mock-external-unguarded#inline/mock-iam-admin | {"all_iam_actions": true, "assessment": "escalation candidate, effective privilege not proven", "condition_present": false, "pass_role": true, "resources": ["*"], "statement_index": 0} | Restrict IAM actions and role ARNs, require iam:PassedToService for PassRole, and review boundaries, denies, and the caller's related service grants. |  |
+| critical | IAM005 | arn:aws:iam::aws:policy/AdministratorAccess | {"all_iam_actions": true, "assessment": "escalation candidate, effective privilege not proven", "condition_present": false, "pass_role": true, "resources": ["*"], "statement_index": 0} | Restrict IAM actions and role ARNs, require iam:PassedToService for PassRole, and review boundaries, denies, and the caller's related service grants. |  |
 | critical | IAM005 | arn:aws:iam::000000000000:user/mock-alder | {"attachment": "direct or group", "policy_name": "AdministratorAccess"} | Replace AdministratorAccess with a scoped role; restrict privileged sessions with approval, MFA, and an appropriate permissions boundary. |  |
 | critical | IAM005 | arn:aws:iam::000000000000:policy/mock-global | {"all_iam_actions": true, "assessment": "escalation candidate, effective privilege not proven", "condition_present": false, "pass_role": true, "resources": ["*"], "statement_index": 0} | Restrict IAM actions and role ARNs, require iam:PassedToService for PassRole, and review boundaries, denies, and the caller's related service grants. |  |
 | high | IAM002 | arn:aws:iam::000000000000:user/mock-alder | {"age_days": 180, "key_fingerprint": "283aa2a6b540f1cf", "key_suffix": "0000", "last_used": null, "reasons": ["no recent use", "rotation threshold reached"], "unused_days": 180} | Identify the key by suffix and fingerprint. Migrate to temporary role credentials; otherwise rotate with a tested overlap, deactivate, then delete the old key. |  |
 | high | IAM007 | arn:aws:iam::000000000000:role/mock-external-unguarded | {"external_id_enforced": false, "external_principals": ["arn:aws:iam::111111111111:root"], "other_conditions_present": false, "statement_index": 0} | Restrict trust to approved role ARNs. For delegated third-party access require a unique ExternalId with StringEquals; review other conditions and keep a trusted-account exception only with an owner and reason. |  |
+| high | IAM004 | arn:aws:iam::aws:policy/AdministratorAccess | {"action_star": true, "condition_present": false, "resource_star": true, "source": "aws-managed", "statement_index": 0} | Replace global actions with required actions and scope resources where supported. Document actions requiring Resource '*' with a suppression. |  |
 | high | IAM005 | arn:aws:iam::000000000000:policy/mock-pass-role | {"all_iam_actions": false, "assessment": "escalation candidate, effective privilege not proven", "condition_present": false, "pass_role": true, "resources": ["arn:aws:iam::000000000000:role/*"], "statement_index": 0} | Restrict IAM actions and role ARNs, require iam:PassedToService for PassRole, and review boundaries, denies, and the caller's related service grants. |  |
 | high | IAM004 | arn:aws:iam::000000000000:policy/mock-global | {"action_star": true, "condition_present": false, "resource_star": true, "source": "customer-managed", "statement_index": 0} | Replace global actions with required actions and scope resources where supported. Document actions requiring Resource '*' with a suppression. |  |
 | high | IAM006 | arn:aws:iam::000000000000:user/mock-alder | {"console_enabled": true, "mfa_device_assigned": false} | Assign and enforce MFA for interactive access; migrate programmatic-only users to workload roles. An assigned device alone does not prove policy enforcement. |  |

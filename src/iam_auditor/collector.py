@@ -47,7 +47,13 @@ class Collector:
         poll_attempts: int = 30,
         poll_interval: float = 1.0,
         sleep: Callable[[float], None] = time.sleep,
+        max_pages: int = 1000,
     ) -> None:
+        if not 1 <= max_pages <= 10000:
+            raise ValueError("max_pages must be between 1 and 10000")
+        if not 1 <= poll_attempts <= 300 or not 0 <= poll_interval <= 60:
+            raise ValueError("Invalid polling bounds")
+        self.max_pages = max_pages
         self.iam = iam
         self.advisor = advisor if advisor is not None else iam
         self.snapshot = Snapshot(account_id=account_id)
@@ -92,6 +98,9 @@ class Collector:
             if page is None:
                 break
             pages.append(page)
+            if page.get("IsTruncated") and len(pages) >= self.max_pages:
+                self.issue(resource, operation, "PaginationLimitExceeded")
+                break
             if not page.get("IsTruncated"):
                 break
             marker = page.get("Marker")
@@ -134,7 +143,9 @@ class Collector:
             self.issue(principal.arn, "get_service_last_accessed_details", "AdvisorPollTimeout")
             return
         seen = set()
+        page_count = 0
         while True:
+            page_count += 1
             principal.services.extend(
                 ServiceAccess(
                     namespace=service["ServiceNamespace"],
@@ -144,6 +155,11 @@ class Collector:
             )
             if not page.get("IsTruncated"):
                 principal.advisor_complete = True
+                return
+            if page_count >= self.max_pages:
+                self.issue(
+                    principal.arn, "get_service_last_accessed_details", "PaginationLimitExceeded"
+                )
                 return
             marker = page.get("Marker")
             if not marker or marker in seen:
@@ -220,7 +236,7 @@ class Collector:
         inventory = self.pages(
             "get_account_authorization_details",
             self.snapshot.account_id,
-            Filter=["User", "Role", "Group", "LocalManagedPolicy"],
+            Filter=["User", "Role", "Group", "LocalManagedPolicy", "AWSManagedPolicy"],
         )
         groups: dict[str, list[str]] = {}
         for page in inventory:
@@ -230,6 +246,8 @@ class Collector:
                 ]
                 self.add_inline(group["Arn"], group.get("GroupPolicyList", []))
             for policy in page.get("Policies", []):
+                if ":iam::aws:policy/" in policy["Arn"] and not policy.get("AttachmentCount"):
+                    continue
                 versions = [
                     version
                     for version in policy.get("PolicyVersionList", [])
@@ -244,7 +262,9 @@ class Collector:
                         Policy(
                             resource=policy["Arn"],
                             document=policy_document(version["Document"]),
-                            source="customer-managed",
+                            source="aws-managed"
+                            if ":iam::aws:policy/" in policy["Arn"]
+                            else "customer-managed",
                         )
                     )
         for page in inventory:
@@ -262,6 +282,9 @@ class Collector:
                         attached_policy_arns=[
                             policy["PolicyArn"] for policy in raw.get("AttachedManagedPolicies", [])
                         ],
+                        permissions_boundary=raw.get("PermissionsBoundary", {}).get(
+                            "PermissionsBoundaryArn"
+                        ),
                         trust=policy_document(raw.get("AssumeRolePolicyDocument", {})),
                     )
                     for group in raw.get("GroupList", []):

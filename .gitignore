@@ -17,3 +17,7 @@ reports/
 *.key
 local*.yaml
 local*.yml
+
+.terraform/
+*.tfstate*
+*.tfplan
