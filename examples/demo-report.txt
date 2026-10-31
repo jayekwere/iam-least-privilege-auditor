@@ -1,8 +1,16 @@
-IAM audit | demo | complete | 17 active | 0 suppressed
+IAM audit | demo | complete | 19 active | 0 suppressed
 ┏━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━┓
 ┃ Severity ┃ Rule   ┃ Resource                  ┃ Evidence                   ┃ Remediation               ┃ Suppression ┃
 ┡━━━━━━━━━━╇━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━┩
 │ critical │ IAM005 │ arn:aws:iam::00000000000… │ {"all_iam_actions": true,  │ Restrict IAM actions and  │             │
+│          │        │                           │ "assessment": "escalation  │ role ARNs, require        │             │
+│          │        │                           │ candidate, effective       │ iam:PassedToService for   │             │
+│          │        │                           │ privilege not proven",     │ PassRole, and review      │             │
+│          │        │                           │ "condition_present":       │ boundaries, denies, and   │             │
+│          │        │                           │ false, "pass_role": true,  │ the caller's related      │             │
+│          │        │                           │ "resources": ["*"],        │ service grants.           │             │
+│          │        │                           │ "statement_index": 0}      │                           │             │
+│ critical │ IAM005 │ arn:aws:iam::aws:policy/… │ {"all_iam_actions": true,  │ Restrict IAM actions and  │             │
 │          │        │                           │ "assessment": "escalation  │ role ARNs, require        │             │
 │          │        │                           │ candidate, effective       │ iam:PassedToService for   │             │
 │          │        │                           │ privilege not proven",     │ PassRole, and review      │             │
@@ -44,6 +52,13 @@ IAM audit | demo | complete | 17 active | 0 suppressed
 │          │        │                           │                            │ a trusted-account         │             │
 │          │        │                           │                            │ exception only with an    │             │
 │          │        │                           │                            │ owner and reason.         │             │
+│ high     │ IAM004 │ arn:aws:iam::aws:policy/… │ {"action_star": true,      │ Replace global actions    │             │
+│          │        │                           │ "condition_present":       │ with required actions and │             │
+│          │        │                           │ false, "resource_star":    │ scope resources where     │             │
+│          │        │                           │ true, "source":            │ supported. Document       │             │
+│          │        │                           │ "aws-managed",             │ actions requiring         │             │
+│          │        │                           │ "statement_index": 0}      │ Resource '*' with a       │             │
+│          │        │                           │                            │ suppression.              │             │
 │ high     │ IAM005 │ arn:aws:iam::00000000000… │ {"all_iam_actions": false, │ Restrict IAM actions and  │             │
 │          │        │                           │ "assessment": "escalation  │ role ARNs, require        │             │
 │          │        │                           │ candidate, effective       │ iam:PassedToService for   │             │

@@ -47,6 +47,11 @@ class Config(Model):
 def load_config(path: Path | None) -> Config:
     if path is None:
         return Config()
-    with path.open(encoding="utf-8") as handle:
-        data = yaml.safe_load(handle)
+    content = path.read_bytes()
+    if len(content) > 65536:
+        raise ValueError("Configuration exceeds 64 KiB")
+    # Reject aliases: recursive structures and alias expansion are unnecessary here.
+    if any(isinstance(token, (yaml.AliasToken, yaml.AnchorToken)) for token in yaml.scan(content)):
+        raise ValueError("YAML aliases and anchors are unsupported")
+    data = yaml.safe_load(content)
     return Config.model_validate({} if data is None else data)

@@ -41,7 +41,7 @@ def test_decode_document() -> None:
 
 def test_inventory_pagination_and_bad_markers() -> None:
     client = iam_client()
-    expected = {"Filter": ["User", "Role", "Group", "LocalManagedPolicy"]}
+    expected = {"Filter": ["User", "Role", "Group", "LocalManagedPolicy", "AWSManagedPolicy"]}
     with Stubber(client) as stubber:
         stubber.add_response(
             "get_account_authorization_details",
@@ -292,3 +292,21 @@ def test_real_sdk_assume_role_keeps_two_moto_accounts_isolated() -> None:
             assert all(
                 f"::{snapshot.account_id}:" in principal.arn for principal in snapshot.principals
             )
+
+
+def test_unique_markers_cannot_bypass_inventory_bound() -> None:
+    client = Mock()
+    client.list_users.side_effect = [
+        {"IsTruncated": True, "Marker": "one"},
+        {"IsTruncated": True, "Marker": "two"},
+    ]
+    collector = Collector(client, DEMO_ACCOUNT, max_pages=2)
+    assert len(collector.pages("list_users", DEMO_ACCOUNT)) == 2
+    assert client.list_users.call_count == 2
+    assert collector.snapshot.issues[0].code == "PaginationLimitExceeded"
+
+
+@pytest.mark.parametrize("limit", [0, -1, 10001])
+def test_invalid_page_bounds(limit: int) -> None:
+    with pytest.raises(ValueError, match="max_pages"):
+        Collector(Mock(), DEMO_ACCOUNT, max_pages=limit)

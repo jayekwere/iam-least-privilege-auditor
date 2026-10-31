@@ -22,7 +22,7 @@ def test_demo_cli_real_moto_no_network(fmt: str) -> None:
     assert result.exit_code == 0, result.output
     if fmt == "json":
         report = Report.model_validate_json(result.output)
-        assert report.summary.active == 17
+        assert report.summary.active == 19
         assert report.mode == "demo" and report.status == "complete"
         assert len({item.rule_id for item in report.findings}) == 7
     else:
@@ -37,7 +37,7 @@ def test_output_file_private_and_repeatable(tmp_path: Path) -> None:
         assert result.exit_code == 0 and not result.output
         assert stat.S_IMODE(output.stat().st_mode) == 0o600
     assert len(list(output.parent.iterdir())) == 1
-    assert json.loads(output.read_text())["summary"]["active"] == 17
+    assert json.loads(output.read_text())["summary"]["active"] == 19
 
 
 def test_config_suppression_and_fail_thresholds(tmp_path: Path) -> None:
@@ -52,7 +52,7 @@ def test_config_suppression_and_fail_thresholds(tmp_path: Path) -> None:
     )
     assert result.exit_code == 0
     report = Report.model_validate_json(result.output)
-    assert report.summary.suppressed == 4 and report.summary.active == 13
+    assert report.summary.suppressed == 5 and report.summary.active == 14
     assert runner.invoke(app, ["demo", "--fail-on", "high"]).exit_code == 1
 
 

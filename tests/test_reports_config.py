@@ -54,7 +54,7 @@ def test_formats_schema_and_severity_order() -> None:
     report = build_report([snapshot], findings, Config(), NOW, "demo")
     assert [item.severity for item in report.findings] == list(Severity)
     assert Report.model_validate_json(render(report, "json")) == report
-    assert json.loads(render(report, "json"))["schema_version"] == "1.0.0"
+    assert json.loads(render(report, "json"))["schema_version"] == "1.1.0"
     markdown = render(report, "markdown")
     assert "| critical | IAM006 |" in markdown
     assert "x\\|y" in markdown

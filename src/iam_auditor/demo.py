@@ -52,7 +52,8 @@ def seed_environment(iam: Any, now: datetime = DEMO_NOW) -> None:
         iam.create_user(UserName="mock-birch")
         # The password and key are fake, stay in Moto memory, and cannot authenticate to AWS.
         iam.create_login_profile(
-            UserName="mock-alder", Password="MOCK-ONLY-not-a-real-password-42!"
+            UserName="mock-alder",
+            Password="MOCK-ONLY-not-a-real-password-42!",  # nosec B106
         )
         with patch(
             "moto.iam.models.generate_access_key_id_from_account_id", return_value=MOCK_KEY_ID
@@ -128,7 +129,7 @@ def mock_inventory(now: datetime = DEMO_NOW) -> Iterator[Any]:
             "iam",
             region_name="us-east-1",
             aws_access_key_id="mock-access-key",
-            aws_secret_access_key="mock-secret-not-valid",
+            aws_secret_access_key="mock-secret-not-valid",  # nosec B106
         )
         seed_environment(iam, now)
         yield iam
@@ -177,7 +178,7 @@ def demo_snapshot(now: datetime = DEMO_NOW) -> Snapshot:
             "iam",
             region_name="us-east-1",
             aws_access_key_id="mock-access-key",
-            aws_secret_access_key="mock-secret-not-valid",
+            aws_secret_access_key="mock-secret-not-valid",  # nosec B106
         )
         inventory = iam.get_account_authorization_details(
             Filter=["User", "Role", "Group", "LocalManagedPolicy"],

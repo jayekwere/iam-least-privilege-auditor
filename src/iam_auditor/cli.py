@@ -15,7 +15,8 @@ from botocore.exceptions import BotoCoreError, ClientError
 from pydantic import ValidationError
 
 from iam_auditor import __version__
-from iam_auditor.collector import collect_accounts
+from iam_auditor.analyzer import collect_analyzer
+from iam_auditor.collector import SDK_CONFIG, collect_accounts
 from iam_auditor.config import load_config
 from iam_auditor.models import Report, Severity, Snapshot
 from iam_auditor.report import SEVERITY_ORDER, build_report, render
@@ -134,6 +135,7 @@ def audit(
     ] = None,
     role_name: Annotated[str | None, typer.Option("--role-name")] = None,
     external_id: Annotated[str | None, typer.Option("--external-id")] = None,
+    analyzer_arn: Annotated[str | None, typer.Option("--analyzer-arn")] = None,
     profile: Annotated[str | None, typer.Option("--profile")] = None,
     region: Annotated[str, typer.Option("--region")] = "us-east-1",
     partition: Annotated[Partition, typer.Option("--partition")] = Partition.AWS,
@@ -152,10 +154,30 @@ def audit(
         raise typer.BadParameter("Invalid role name or path.")
     if external_id and not accounts:
         raise typer.BadParameter("--external-id requires --account and --role-name.")
+    if len(accounts) > 100:
+        raise typer.BadParameter("At most 100 accounts per invocation.")
+    if external_id and not re.fullmatch(r"[A-Za-z0-9_+=,.@:/-]{2,1224}", external_id):
+        raise typer.BadParameter("Invalid ExternalId.")
+    if analyzer_arn and (
+        accounts
+        or not re.fullmatch(
+            rf"arn:{partition.value}:access-analyzer:{re.escape(region)}:[0-9]{{12}}:analyzer/[A-Za-z0-9_-]+",
+            analyzer_arn,
+        )
+    ):
+        raise typer.BadParameter(
+            "Analyzer must be in the selected region and current account mode."
+        )
     try:
         load_config(config)
         session = boto3.Session(profile_name=profile, region_name=region)
         snapshots = collect_accounts(session, accounts, role_name, external_id, partition.value)
+        if analyzer_arn:
+            if analyzer_arn.split(":")[4] != snapshots[0].account_id:
+                raise ValueError("Analyzer account differs from caller account")
+            collect_analyzer(
+                session.client("accessanalyzer", config=SDK_CONFIG), snapshots[0], analyzer_arn
+            )
         finish(snapshots, config, datetime.now(UTC), False, output_format, output, fail_on)
     except (
         OSError,

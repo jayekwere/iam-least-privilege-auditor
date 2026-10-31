@@ -14,6 +14,7 @@ concurrency:
 jobs:
   quality:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
@@ -36,6 +37,13 @@ jobs:
         run: |
           ruff check .
           ruff format --check .
+      - name: Security source scan
+        run: bandit -r src -q
+      - name: Dependency vulnerability audit
+        if: matrix.python == '3.14'
+        run: |
+          python -c 'import tomllib; from pathlib import Path; p=tomllib.loads(Path("pyproject.toml").read_text())["project"]; Path("reports").mkdir(exist_ok=True); Path("reports/audit-requirements.txt").write_text("\n".join(p["dependencies"] + p["optional-dependencies"]["dev"]))'
+          pip-audit --strict -r reports/audit-requirements.txt
       - name: Strict type checks
         run: mypy
       - name: Offline tests with branch coverage
@@ -46,7 +54,7 @@ jobs:
           iam-audit demo --format json --output reports/demo.json
           iam-audit demo --format markdown --output reports/demo.md
           iam-audit schema > reports/report.schema.json
-          python -c 'import json; from iam_auditor.models import Report; from pathlib import Path; r=Report.model_validate_json(Path("reports/demo.json").read_text()); assert r.summary.active == 17 and r.status == "complete"; assert json.loads(Path("reports/report.schema.json").read_text()) == json.loads(Path("docs/report.schema.json").read_text())'
+          python -c 'import json; from iam_auditor.models import Report; from pathlib import Path; r=Report.model_validate_json(Path("reports/demo.json").read_text()); assert r.summary.active == 19 and r.status == "complete"; assert json.loads(Path("reports/report.schema.json").read_text()) == json.loads(Path("docs/report.schema.json").read_text())'
       - name: Retain verification artifacts
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
@@ -56,3 +64,16 @@ jobs:
             reports/
             coverage.xml
           retention-days: 14
+  lab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3
+        with:
+          terraform_version: 1.14.0
+      - run: terraform fmt -check lab
+      - run: terraform -chdir=lab init -backend=false -lockfile=readonly
+      - run: terraform -chdir=lab validate

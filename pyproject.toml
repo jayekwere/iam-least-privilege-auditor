@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "iam-least-privilege-auditor"
-version = "0.1.0"
+version = "0.2.0"
 description = "Read-only IAM collection and evidence-based least-privilege review"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -22,6 +22,7 @@ Documentation = "https://github.com/jayekwere/iam-least-privilege-auditor#readme
 demo = ["moto[iam,sts]==5.2.5"]
 dev = [
   "moto[iam,sts]==5.2.5", "pytest==9.2.0", "pytest-cov==7.1.0",
+  "bandit==1.9.4", "pip-audit==2.9.0", "jsonschema==4.25.1",
   "ruff==0.17.3", "mypy==2.4.1", "types-PyYAML==6.0.12.20260906",
 ]
 
@@ -48,5 +49,5 @@ strict = true
 files = ["src", "tests"]
 
 [[tool.mypy.overrides]]
-module = ["boto3.*", "botocore.*", "moto.*"]
+module = ["boto3.*", "botocore.*", "moto.*", "jsonschema.*"]
 ignore_missing_imports = true

@@ -28,6 +28,8 @@ class RuleId(StrEnum):
     ADMIN_ACCESS = "IAM005"
     MISSING_MFA = "IAM006"
     EXTERNAL_TRUST = "IAM007"
+    FEDERATED_TRUST = "IAM008"
+    ANALYZER = "IAM009"
 
 
 class Finding(Model):
@@ -39,6 +41,7 @@ class Finding(Model):
     title: str
     evidence: dict[str, JsonValue]
     remediation: str
+    classification: Literal["observed_misconfiguration", "review_candidate"] = "review_candidate"
     suppression_reason: str | None = None
 
 
@@ -64,7 +67,7 @@ class Summary(Model):
 
 
 class Report(Model):
-    schema_version: Literal["1.0.0"] = "1.0.0"
+    schema_version: Literal["1.1.0"] = "1.1.0"
     tool_version: str = __version__
     generated_at: datetime
     mode: Literal["live", "demo"]
@@ -103,17 +106,19 @@ class Principal(Model):
     advisor_complete: bool = False
     identity_complete: bool = True
     attached_policy_arns: list[str] = Field(default_factory=list)
+    permissions_boundary: str | None = None
     trust: dict[str, JsonValue] = Field(default_factory=dict)
 
 
 class Policy(Model):
     resource: str
     document: dict[str, JsonValue]
-    source: Literal["customer-managed", "inline"]
+    source: Literal["customer-managed", "aws-managed", "inline"]
 
 
 class Snapshot(Model):
     account_id: str
     principals: list[Principal] = Field(default_factory=list)
     policies: list[Policy] = Field(default_factory=list)
+    analyzer_findings: list[dict[str, JsonValue]] = Field(default_factory=list)
     issues: list[CollectionIssue] = Field(default_factory=list)

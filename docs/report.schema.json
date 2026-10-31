@@ -74,6 +74,15 @@
           "title": "Account Id",
           "type": "string"
         },
+        "classification": {
+          "default": "review_candidate",
+          "enum": [
+            "observed_misconfiguration",
+            "review_candidate"
+          ],
+          "title": "Classification",
+          "type": "string"
+        },
         "evidence": {
           "additionalProperties": {
             "$ref": "#/$defs/JsonValue"
@@ -138,7 +147,9 @@
         "IAM004",
         "IAM005",
         "IAM006",
-        "IAM007"
+        "IAM007",
+        "IAM008",
+        "IAM009"
       ],
       "title": "RuleId",
       "type": "string"
@@ -221,8 +232,8 @@
       "type": "string"
     },
     "schema_version": {
-      "const": "1.0.0",
-      "default": "1.0.0",
+      "const": "1.1.0",
+      "default": "1.1.0",
       "title": "Schema Version",
       "type": "string"
     },
@@ -245,7 +256,7 @@
       "type": "array"
     },
     "tool_version": {
-      "default": "0.1.0",
+      "default": "0.2.0",
       "title": "Tool Version",
       "type": "string"
     }

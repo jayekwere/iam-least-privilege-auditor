@@ -2,7 +2,7 @@ PYTHON ?= python3
 VENV ?= .venv
 BIN := $(VENV)/bin
 
-.PHONY: install demo lint typecheck test check
+.PHONY: install demo lint typecheck test security check
 
 $(BIN)/iam-audit: pyproject.toml
 	$(PYTHON) -m venv $(VENV)
@@ -24,4 +24,7 @@ typecheck: install
 test: install
 	$(BIN)/pytest
 
-check: lint typecheck test
+security: install
+	$(BIN)/bandit -r src -q
+
+check: lint typecheck security test

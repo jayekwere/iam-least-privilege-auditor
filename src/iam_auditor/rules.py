@@ -35,6 +35,9 @@ def finding(
         title=title,
         evidence=evidence,
         remediation=remediation,
+        classification="observed_misconfiguration"
+        if rule == RuleId.MISSING_MFA
+        else "review_candidate",
     )
 
 
@@ -345,6 +348,75 @@ def external_trust(snapshot: Snapshot, config: Config, now: datetime) -> list[Fi
     return results
 
 
+def federated_trust(snapshot: Snapshot, config: Config, now: datetime) -> list[Finding]:
+    results = []
+    for principal in snapshot.principals:
+        for index, statement in statements(principal.trust):
+            raw = statement.get("Principal", {})
+            providers = strings(raw.get("Federated")) if isinstance(raw, dict) else []
+            actions = [a.lower() for a in strings(statement.get("Action"))]
+            if not providers or not any(
+                fnmatch.fnmatchcase("sts:assumerolewithwebidentity", a) for a in actions
+            ):
+                continue
+            for provider in providers:
+                if ":oidc-provider/" not in provider:
+                    continue
+                issuer = provider.split(":oidc-provider/", 1)[1]
+                conditions = statement.get("Condition", {})
+                constrained = []
+                for claim in ("aud", "sub"):
+                    values = (
+                        conditions.get("StringEquals", {}) if isinstance(conditions, dict) else {}
+                    )
+                    matches = (
+                        strings(values.get(f"{issuer}:{claim}")) if isinstance(values, dict) else []
+                    )
+                    if matches and all(
+                        v.strip() and "*" not in v and "?" not in v for v in matches
+                    ):
+                        constrained.append(claim)
+                if len(constrained) == 2:
+                    continue
+                results.append(
+                    finding(
+                        snapshot,
+                        RuleId.FEDERATED_TRUST,
+                        Severity.HIGH,
+                        principal.arn,
+                        "OIDC trust lacks exact audience or subject constraints",
+                        {
+                            "statement_index": index,
+                            "provider": provider,
+                            "exact_claims": constrained,
+                            "condition_present": bool(conditions),
+                        },
+                        "Review issuer-specific claims; restrict audience and subjects to approved "
+                        "workloads. Pattern-based conditions may be intentional "
+                        "and require review.",
+                        f"{index}:{provider}",
+                    )
+                )
+    return results
+
+
+def analyzer_evidence(snapshot: Snapshot, config: Config, now: datetime) -> list[Finding]:
+    return [
+        finding(
+            snapshot,
+            RuleId.ANALYZER,
+            Severity.HIGH,
+            str(row["resource"]),
+            "Access Analyzer reports active external access",
+            row,
+            "Review the analyzer trust zone, finding timestamp and resource policy; "
+            "confirm intended sharing before changing access.",
+            str(row["id"]),
+        )
+        for row in snapshot.analyzer_findings
+    ]
+
+
 RULES: tuple[Callable[[Snapshot, Config, datetime], list[Finding]], ...] = (
     unused_permissions,
     stale_keys,
@@ -353,8 +425,17 @@ RULES: tuple[Callable[[Snapshot, Config, datetime], list[Finding]], ...] = (
     admin_access,
     missing_mfa,
     external_trust,
+    federated_trust,
+    analyzer_evidence,
 )
 
 
 def evaluate(snapshot: Snapshot, config: Config, now: datetime) -> list[Finding]:
-    return [result for rule in RULES for result in rule(snapshot, config, now)]
+    results = [result for rule in RULES for result in rule(snapshot, config, now)]
+    boundaries = {p.arn: p.permissions_boundary for p in snapshot.principals}
+    for result in results:
+        owner = result.resource.split("#inline/", 1)[0]
+        if boundaries.get(owner):
+            result.evidence["permissions_boundary"] = boundaries[owner]
+            result.evidence["boundary_effect"] = "not evaluated"
+    return results
