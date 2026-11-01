@@ -125,3 +125,7 @@ MIT licensed. Contributions should include a focused test and use only fictional
 IAM008 reviews OIDC Allow statements missing exact issuer-qualified audience or subject conditions. Pattern-based trust is a review candidate, not proven unsafe. IAM009 imports active IAM role external-access findings from an existing regional analyzer using `iam-audit audit --analyzer-arn ARN --region REGION`. This option supports current-account mode only and never creates analyzers. Denied or truncated Analyzer collection makes the report incomplete. Other regions and archived findings are outside the request.
 
 Findings include `classification`: missing MFA assignment is an observed misconfiguration; all other results are review candidates. No rule claims validated effective permissions. See the [architecture and threat model](docs/threat-model.md), [controlled lab](lab/README.md), [contribution guidance](CONTRIBUTING.md), and [security reporting](SECURITY.md).
+
+---
+
+**AI assistance:** AI tools helped with code or documentation.
